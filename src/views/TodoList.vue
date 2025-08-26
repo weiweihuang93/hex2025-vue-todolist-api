@@ -107,6 +107,20 @@ const toggleStatus = async (todo_id) => {
 const totalUndoneTodo = computed(() => {
   return todos.value.filter((todo) => !todo.status).length
 })
+
+// 狀態切換與篩選功能
+const currentFilter = ref('all')
+
+const filteredTodos = computed(() => {
+  switch (currentFilter.value) {
+    case 'undone':
+      return todos.value.filter((t) => !t.status)
+    case 'done':
+      return todos.value.filter((t) => t.status)
+    default:
+      return todos.value
+  }
+})
 </script>
 
 <template>
@@ -120,7 +134,7 @@ const totalUndoneTodo = computed(() => {
           </a>
         </li>
         <li>
-          <a @click.prevent="signOut" href="#">登出</a>
+          <a @click.prevent="signOut">登出</a>
         </li>
       </ul>
     </nav>
@@ -128,19 +142,35 @@ const totalUndoneTodo = computed(() => {
       <div class="todoList_Content">
         <div class="inputBox">
           <input v-model="newTodo.content" type="text" placeholder="請輸入待辦事項" />
-          <a @click.prevent="addTodo" href="#">
+          <a @click.prevent="addTodo">
             <i class="fa fa-plus"></i>
           </a>
         </div>
-        <div class="todoList_list">
+        <div v-if="todos.length > 0" class="todoList_list">
           <ul class="todoList_tab">
-            <li><a href="#" class="active">全部</a></li>
-            <li><a href="#">待完成</a></li>
-            <li><a href="#">已完成</a></li>
+            <li>
+              <a @click.prevent="currentFilter = 'all'" :class="{ active: currentFilter === 'all' }"
+                >全部</a
+              >
+            </li>
+            <li>
+              <a
+                @click.prevent="currentFilter = 'undone'"
+                :class="{ active: currentFilter === 'undone' }"
+                >待完成</a
+              >
+            </li>
+            <li>
+              <a
+                @click.prevent="currentFilter = 'done'"
+                :class="{ active: currentFilter === 'done' }"
+                >已完成</a
+              >
+            </li>
           </ul>
           <div class="todoList_items">
             <ul class="todoList_item">
-              <li v-for="todo in todos" :key="todo.id">
+              <li v-for="todo in filteredTodos" :key="todo.id">
                 <label class="todoList_label">
                   <input
                     type="checkbox"
@@ -150,7 +180,7 @@ const totalUndoneTodo = computed(() => {
                   />
                   <span>{{ todo.content }}</span>
                 </label>
-                <a @click.prevent="removeTodo(todo.id)" href="#">
+                <a @click.prevent="removeTodo(todo.id)">
                   <i class="fa fa-times"></i>
                 </a>
               </li>
@@ -159,6 +189,14 @@ const totalUndoneTodo = computed(() => {
               <p>{{ totalUndoneTodo }} 個待完成項目</p>
             </div>
           </div>
+        </div>
+        <div v-else class="empty">
+          <p class="">目前尚無待辦事項</p>
+          <img
+            class="emptyImg"
+            src="https://github.com/hexschool/2022-web-layout-training/blob/main/todolist/empty%201.png?raw=true"
+            alt="emptyImg"
+          />
         </div>
       </div>
     </div>

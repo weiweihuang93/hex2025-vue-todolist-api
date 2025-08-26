@@ -167,6 +167,11 @@ img {
   margin-bottom: 16px;
 }
 
+.emptyImg {
+  width: 240px;
+  height: auto;
+}
+
 .vhContainer {
   height: 100vh;
 }
@@ -609,4 +614,15 @@ nav ul a span {
   color: #9f9a91;
   font-size: 0.875rem;
   text-decoration: none;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.empty p {
+  margin-top: 44px;
 }
