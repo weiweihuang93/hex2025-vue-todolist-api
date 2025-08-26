@@ -367,7 +367,7 @@ nav ul a span {
   text-decoration: none;
 }
 
-.formControls span {
+.errorMsg {
   margin: 4px 0 16px 0;
   color: #d87355;
   font-size: 0.875rem;
@@ -610,4 +610,3 @@ nav ul a span {
   font-size: 0.875rem;
   text-decoration: none;
 }
-/*# sourceMappingURL=all.css.map */
