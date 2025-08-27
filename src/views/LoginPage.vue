@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
 
@@ -18,23 +18,23 @@ const loginForm = ref({
 const errors = ref({
   email: '',
   password: '',
-  nickname: '',
-  confirmPassword: '',
 })
+
+// 監聽 loginForm 所有欄位
+watch(
+  loginForm,
+  (newVal) => {
+    errors.value.email = newVal.email.trim() ? '' : '此欄位不可留空'
+    errors.value.password = newVal.password ? '' : '此欄位不可留空'
+  },
+  { deep: true },
+)
 
 const todoToken = ref('')
 
 const signIn = async () => {
-  // 重置錯誤訊息
-  errors.value = { email: '', password: '' }
-
-  // 空值檢查
-  if (!loginForm.value.email.trim()) {
-    errors.value.email = '此欄位不可留空'
-  }
-  if (!loginForm.value.password.trim()) {
-    errors.value.password = '此欄位不可留空'
-  }
+  errors.value.email = loginForm.value.email.trim() ? '' : '此欄位不可留空'
+  errors.value.password = loginForm.value.password ? '' : '此欄位不可留空'
 
   // 如果有任何錯誤就直接 return
   if (errors.value.email || errors.value.password) return
@@ -46,7 +46,7 @@ const signIn = async () => {
     const expireDate = new Date(res.data.exp * 1000)
     document.cookie = `todoToken=${todoToken.value}; expires=${expireDate.toUTCString()}; path=/`
 
-    loginForm.value = { email: '', password: '' }
+    resetForm()
 
     await Swal.fire({
       icon: 'success',
@@ -65,8 +65,13 @@ const signIn = async () => {
       confirmButtonText: '請重新登入',
     })
 
-    loginForm.value = { email: '', password: '' }
+    resetForm()
   }
+}
+
+const resetForm = () => {
+  loginForm.value = { email: '', password: '' }
+  errors.value = { email: '', password: '' }
 }
 </script>
 

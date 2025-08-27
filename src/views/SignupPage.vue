@@ -25,7 +25,22 @@ const errors = ref({
   confirmPassword: '',
 })
 
-//
+// 監聽 registerForm 所有欄位
+watch(
+  registerForm,
+  (newVal) => {
+    errors.value.email = newVal.email.trim() ? '' : '此欄位不可留空'
+    errors.value.password = newVal.password ? '' : '此欄位不可留空'
+    errors.value.nickname = newVal.nickname.trim() ? '' : '此欄位不可留空'
+  },
+  { deep: true },
+)
+
+watch(confirmPassword, (val) => {
+  errors.value.confirmPassword = val ? '' : '此欄位不可留空'
+})
+
+// 判斷密碼不一致
 const validateConfirmPassword = computed(() => {
   // 如果任一個還沒輸入，就不需要判斷一致性
   if (!registerForm.value.password || !confirmPassword.value) {
@@ -43,22 +58,15 @@ watch(validateConfirmPassword, (val) => {
 })
 
 const signUp = async () => {
-  // 重置錯誤訊息
-  errors.value = { email: '', password: '', nickname: '', confirmPassword: '' }
-
-  // 空值檢查
-  if (!registerForm.value.email.trim()) {
-    errors.value.email = '此欄位不可留空'
-  }
-  if (!registerForm.value.password.trim()) {
-    errors.value.password = '此欄位不可留空'
-  }
-  if (!registerForm.value.nickname.trim()) {
-    errors.value.nickname = '此欄位不可留空'
-  }
-  if (!confirmPassword.value.trim()) {
-    errors.value.confirmPassword = '此欄位不可留空'
-  }
+  // 同步檢查空值與 confirm 密碼
+  errors.value.email = registerForm.value.email.trim() ? '' : '此欄位不可留空'
+  errors.value.password = registerForm.value.password ? '' : '此欄位不可留空'
+  errors.value.nickname = registerForm.value.nickname.trim() ? '' : '此欄位不可留空'
+  errors.value.confirmPassword = confirmPassword.value
+    ? registerForm.value.password !== confirmPassword.value
+      ? '密碼不一致'
+      : ''
+    : '此欄位不可留空'
 
   // 如果有任何錯誤就直接 return
   if (
@@ -71,8 +79,7 @@ const signUp = async () => {
 
   try {
     await axios.post(`${BASE_URL}/users/sign_up`, registerForm.value)
-    registerForm.value = { email: '', password: '', nickname: '' }
-    confirmPassword.value = ''
+    resetForm()
 
     await Swal.fire({
       icon: 'success',
@@ -91,9 +98,14 @@ const signUp = async () => {
       confirmButtonText: '請重新註冊',
     })
 
-    registerForm.value = { email: '', password: '', nickname: '' }
-    confirmPassword.value = ''
+    resetForm()
   }
+}
+
+const resetForm = () => {
+  registerForm.value = { email: '', password: '', nickname: '' }
+  confirmPassword.value = ''
+  errors.value = { email: '', password: '', nickname: '', confirmPassword: '' }
 }
 </script>
 
