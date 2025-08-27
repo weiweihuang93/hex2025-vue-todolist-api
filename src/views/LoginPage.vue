@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import Swal from 'sweetalert2'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
@@ -45,12 +46,26 @@ const signIn = async () => {
     const expireDate = new Date(res.data.exp * 1000)
     document.cookie = `todoToken=${todoToken.value}; expires=${expireDate.toUTCString()}; path=/`
 
-    loginForm.value = {}
-    console.log(`您好，${res.data.nickname} 登入成功！`)
+    loginForm.value = { email: '', password: '' }
+
+    await Swal.fire({
+      icon: 'success',
+      title: '登入成功',
+      text: `您好，${res.data.nickname}！`,
+      confirmButtonText: '進入待辦頁面',
+    })
 
     router.push('/todolist')
   } catch (error) {
-    console.log('註冊失敗', error)
+    const msg = error.response?.data?.message || '發生未知錯誤'
+    Swal.fire({
+      icon: 'error',
+      title: '登入失敗',
+      text: msg,
+      confirmButtonText: '請重新登入',
+    })
+
+    loginForm.value = { email: '', password: '' }
   }
 }
 </script>

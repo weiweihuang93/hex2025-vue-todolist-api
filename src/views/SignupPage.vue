@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import Swal from 'sweetalert2'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
@@ -69,14 +70,29 @@ const signUp = async () => {
     return
 
   try {
-    const res = await axios.post(`${BASE_URL}/users/sign_up`, registerForm.value)
+    await axios.post(`${BASE_URL}/users/sign_up`, registerForm.value)
     registerForm.value = { email: '', password: '', nickname: '' }
     confirmPassword.value = ''
-    console.log('註冊成功')
+
+    await Swal.fire({
+      icon: 'success',
+      title: '註冊成功',
+      text: '歡迎加入，將為你導向登入頁面',
+      confirmButtonText: '前往登入',
+    })
 
     router.push('/login')
   } catch (error) {
-    console.log('註冊失敗', error)
+    const msg = error.response?.data?.message || '發生未知錯誤'
+    Swal.fire({
+      icon: 'error',
+      title: '註冊失敗',
+      text: msg,
+      confirmButtonText: '請重新註冊',
+    })
+
+    registerForm.value = { email: '', password: '', nickname: '' }
+    confirmPassword.value = ''
   }
 }
 </script>

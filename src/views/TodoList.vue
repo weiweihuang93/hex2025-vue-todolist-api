@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import Swal from 'sweetalert2'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
@@ -24,9 +25,24 @@ onMounted(async () => {
       headers: { Authorization: todoToken.value },
     })
     nickname.value = res.data.nickname
+    await Swal.fire({
+      icon: 'success',
+      title: '驗證成功',
+      text: `您好，${nickname.value}，載入代辦事項中`,
+      timer: 1500,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      allowOutsideClick: false,
+    })
     await getTodos()
   } catch (error) {
-    console.log('驗證失敗', error)
+    const msg = error.response?.data?.message || '發生未知錯誤'
+    await Swal.fire({
+      icon: 'error',
+      title: '驗證失敗',
+      text: msg,
+      confirmButtonText: '請重新登入',
+    })
     router.push('/login')
   }
 })
@@ -34,14 +50,28 @@ onMounted(async () => {
 // 登出
 const signOut = async () => {
   try {
-    const res = await axios.post(`${BASE_URL}/users/sign_out`, null, {
+    await axios.post(`${BASE_URL}/users/sign_out`, null, {
       headers: { Authorization: todoToken.value },
     })
+    await Swal.fire({
+      icon: 'success',
+      title: '登出成功',
+      text: `您好，${nickname.value}，再見！`,
+      showConfirmButton: false,
+      timer: 1500,
+    })
     todoToken.value = ''
+    nickname.value = ''
     document.cookie = 'todoToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
     router.push('/login')
   } catch (error) {
-    console.log('登出失敗', error)
+    const msg = error.response?.data?.message || '發生未知錯誤'
+    await Swal.fire({
+      icon: 'error',
+      title: '登出失敗',
+      text: msg,
+      confirmButtonText: '請重新登出',
+    })
   }
 }
 
@@ -55,7 +85,13 @@ const getTodos = async () => {
     })
     todos.value = res.data.data
   } catch (error) {
-    console.log('代辦事項載入失敗', error)
+    const msg = error.response?.data?.message || '發生未知錯誤'
+    await Swal.fire({
+      icon: 'error',
+      title: '載入失敗',
+      text: msg,
+      confirmButtonText: '請重新確認',
+    })
   }
 }
 
@@ -66,17 +102,44 @@ const newTodo = ref({
 // 新增代辦事項
 const addTodo = async () => {
   if (!newTodo.value.content.trim()) {
-    console.log('欄位未填寫')
+    Swal.fire({
+      icon: 'warning',
+      title: '欄位未填寫',
+      text: '請確實填寫後再送出',
+      confirmButtonText: '確定',
+    })
     return
   }
   try {
     const res = await axios.post(`${BASE_URL}/todos/`, newTodo.value, {
       headers: { Authorization: todoToken.value },
     })
-    await getTodos()
     newTodo.value.content = ''
+    await getTodos()
+    await Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: '新增成功',
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: {
+        popup: 'my-toast',
+      },
+    })
   } catch (error) {
-    console.log('新增失敗', error)
+    const msg = error.response?.data?.message || '發生未知錯誤'
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'error',
+      title: msg,
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: {
+        popup: 'my-toast',
+      },
+    })
   }
 }
 
@@ -87,8 +150,30 @@ const removeTodo = async (todo_id) => {
       headers: { Authorization: todoToken.value },
     })
     await getTodos()
+    await Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: '刪除成功',
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: {
+        popup: 'my-toast',
+      },
+    })
   } catch (error) {
-    console.log('刪除失敗', error)
+    const msg = error.response?.data?.message || '發生未知錯誤'
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'error',
+      title: msg,
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: {
+        popup: 'my-toast',
+      },
+    })
   }
 }
 
@@ -99,8 +184,30 @@ const toggleStatus = async (todo_id) => {
       headers: { Authorization: todoToken.value },
     })
     await getTodos()
+    await Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: '狀態更新成功',
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: {
+        popup: 'my-toast',
+      },
+    })
   } catch (error) {
-    console.log('更新失敗', error)
+    const msg = error.response?.data?.message || '發生未知錯誤'
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'error',
+      title: msg,
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: {
+        popup: 'my-toast',
+      },
+    })
   }
 }
 
